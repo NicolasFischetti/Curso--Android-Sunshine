@@ -74,8 +74,7 @@ public class MainActivity extends AppCompatActivity implements
          * parameter is useful mostly for HORIZONTAL layouts that should reverse for right to left
          * languages.
          */
-        LinearLayoutManager layoutManager
-                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mRecyclerView.setLayoutManager(layoutManager);
 

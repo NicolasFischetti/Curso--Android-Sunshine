@@ -16,13 +16,17 @@
 -->
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
                   android:layout_width="match_parent"
-                  android:layout_height="match_parent">
+                  android:layout_height="match_parent" >
+
+    <PreferenceCategory
+        android:title="Users Options">
 
     <EditTextPreference
         android:defaultValue="@string/pref_location_default"
         android:inputType="text"
         android:key="@string/pref_location_key"
         android:singleLine="true"
+        android:summary="Get the location"
         android:title="@string/pref_location_label" />
 
     <ListPreference
@@ -30,6 +34,9 @@
         android:entries="@array/pref_units_options"
         android:entryValues="@array/pref_units_values"
         android:key="@string/pref_units_key"
+        android:summary="Select your unit"
         android:title="@string/pref_units_label" />
 
+
+    </PreferenceCategory>
 </PreferenceScreen>

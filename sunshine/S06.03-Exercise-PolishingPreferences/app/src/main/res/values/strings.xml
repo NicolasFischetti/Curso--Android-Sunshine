@@ -61,6 +61,8 @@
     <!-- Label for imperial option in temperature unit preference [CHAR LIMIT=25] -->
     <string name="pref_units_label_imperial">Imperial</string>
 
+    <string name="pref_units_label_fahrenheit">Fahrenheit</string>
+
     <!-- Key name for temperature unit preference in SharedPreferences [CHAR LIMIT=NONE] -->
     <string name="pref_units_key" translatable="false">units</string>
 
@@ -69,6 +71,8 @@
 
     <!-- Value in SharedPreferences for imperial temperature unit option [CHAR LIMIT=NONE] -->
     <string name="pref_units_imperial" translatable="false">imperial</string>
+
+    <string name="pref_units_fahrenheit" translatable="false">Fahrenheit</string>
 
 
     <!-- - - - - - - - - - - - - -->

@@ -22,6 +22,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private void setPreferenceSummary(Preference preference, Object value) {
+
         String stringValue = value.toString();
         String key = preference.getKey();
 
@@ -57,7 +58,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     }
 
     @Override
-    public void onStop() {
+    public void onStop() { // si no esta activo, pone pause a las preferencias
         super.onStop();
         /* Unregister the preference change listener */
         getPreferenceScreen().getSharedPreferences()
@@ -67,12 +68,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
     @Override
     public void onStart() {
         super.onStart();
-        /* Register the preference change listener */
+        /* Register the preference change listener */ // y se fija si cambiaron algo
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
+    //cuando se cambia algo desde el menu(el menu de adentro) de preferencias
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         Preference preference = findPreference(key);
         if (null != preference) {

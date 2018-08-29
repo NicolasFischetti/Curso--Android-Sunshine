@@ -41,8 +41,8 @@ public class SunshinePreferences {
      * Before you implement methods to return your REAL preference for location,
      * we provide some default values to work with.
      */
-    private static final String DEFAULT_WEATHER_LOCATION = "94043,USA";
-    private static final double[] DEFAULT_WEATHER_COORDINATES = {37.4284, 122.0724};
+    private static final String DEFAULT_WEATHER_LOCATION = "ARXX1103, Temperley";
+    private static final double[] DEFAULT_WEATHER_COORDINATES = {-34.6076, -58.4371};
 
     private static final String DEFAULT_MAP_LOCATION =
             "1600 Amphitheatre Parkway, Mountain View, CA 94043";
@@ -113,10 +113,21 @@ public class SunshinePreferences {
     public static boolean isMetric(Context context) {
         // TODO (2) Return true if the user's preference for units is metric, false otherwise
         /** This will be implemented in a future lesson **/
+        SharedPreferences pref = PreferenceManager
+                .getDefaultSharedPreferences(context);
 
-        return true;
+        String keyUnits = context.getString(R.string.pref_units_key);
+        String metricUnit = context.getString(R.string.pref_units_metric);
+
+        String prefUnits = pref.getString(keyUnits, metricUnit);
+        boolean returnUnit;
+        if (metricUnit.equals(prefUnits)) {
+            returnUnit = true;
+        } else  {
+            returnUnit = false;
+        }
+        return returnUnit;
     }
-
     /**
      * Returns the location coordinates associated with the location.  Note that these coordinates
      * may not be set, which results in (0,0) being returned. (conveniently, 0,0 is in the middle

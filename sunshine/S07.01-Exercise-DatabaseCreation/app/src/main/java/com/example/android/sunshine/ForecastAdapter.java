@@ -29,7 +29,7 @@ import android.widget.TextView;
  */
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
 
-    private String[] mWeatherData;
+    private String[] mWeatherData; // data del clima
 
     /*
      * An on-click handler that we've defined to make it easy for an Activity to interface with
@@ -40,7 +40,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     /**
      * The interface that receives onClick messages.
      */
-    public interface ForecastAdapterOnClickHandler {
+    public interface ForecastAdapterOnClickHandler { // un click para cada dia
         void onClick(String weatherForDay);
     }
 
@@ -51,19 +51,19 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      *                     when an item is clicked.
      */
     public ForecastAdapter(ForecastAdapterOnClickHandler clickHandler) {
-        mClickHandler = clickHandler;
+        mClickHandler = clickHandler; // crea el adaptador para hacer un click en la data
     }
 
     /**
      * Cache of the children views for a forecast list item.
      */
     public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
-        public final TextView mWeatherTextView;
+        public final TextView mWeatherTextView; // trae el id del texto
 
         public ForecastAdapterViewHolder(View view) {
-            super(view);
+            super(view); // crea el constructor de la view
             mWeatherTextView = (TextView) view.findViewById(R.id.tv_weather_data);
-            view.setOnClickListener(this);
+            view.setOnClickListener(this); // le setea o implementa un onclick
         }
 
         /**
@@ -72,57 +72,38 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
          * @param v The View that was clicked
          */
         @Override
-        public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
+        public void onClick(View v) { // v es la View que fue clikeada. Esto se llama por las vistas secundarios haciendo un click.
+            int adapterPosition = getAdapterPosition(); // posicion del adapter, donde se encuentra el elemento
             String weatherForDay = mWeatherData[adapterPosition];
             mClickHandler.onClick(weatherForDay);
         }
     }
 
-    /**
-     * This gets called when each new ViewHolder is created. This happens when the RecyclerView
-     * is laid out. Enough ViewHolders will be created to fill the screen and allow for scrolling.
-     *
-     * @param viewGroup The ViewGroup that these ViewHolders are contained within.
-     * @param viewType  If your RecyclerView has more than one type of item (which ours doesn't) you
-     *                  can use this viewType integer to provide a different layout. See
-     *                  {@link android.support.v7.widget.RecyclerView.Adapter#getItemViewType(int)}
-     *                  for more details.
-     * @return A new ForecastAdapterViewHolder that holds the View for each list item
-     */
+
+    // Esto es llamado cuando una nueva ViewHolder es creada. Se crean los suficientes ViewHolder para llenar la screen.
+    // El viewGroup a estos ViewHolders
+    // El viewType nos permite integrar diferentes tipos de item.
     @Override
     public ForecastAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         Context context = viewGroup.getContext();
         int layoutIdForListItem = R.layout.forecast_list_item;
         LayoutInflater inflater = LayoutInflater.from(context);
         boolean shouldAttachToParentImmediately = false;
-
         View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
         return new ForecastAdapterViewHolder(view);
     }
 
-    /**
-     * OnBindViewHolder is called by the RecyclerView to display the data at the specified
-     * position. In this method, we update the contents of the ViewHolder to display the weather
-     * details for this particular position, using the "position" argument that is conveniently
-     * passed into us.
-     *
-     * @param forecastAdapterViewHolder The ViewHolder which should be updated to represent the
-     *                                  contents of the item at the given position in the data set.
-     * @param position                  The position of the item within the adapter's data set.
-     */
+
+    // Sirve para desplayar la data en una posicion especifica. Se actualiza el content de las ViewHolder para mostrar
+    // los detalles del tiempo en su posicion particular. Tomando la posicion la cual es pasada por parametro.
+    // se llama al ForecastAdapterViewHolder para representar el contenido del item en la posicion dada.
     @Override
     public void onBindViewHolder(ForecastAdapterViewHolder forecastAdapterViewHolder, int position) {
         String weatherForThisDay = mWeatherData[position];
         forecastAdapterViewHolder.mWeatherTextView.setText(weatherForThisDay);
     }
 
-    /**
-     * This method simply returns the number of items to display. It is used behind the scenes
-     * to help layout our Views and for animations.
-     *
-     * @return The number of items available in our forecast
-     */
+    // Retorna el numero de items que se muestra
     @Override
     public int getItemCount() {
         if (null == mWeatherData) return 0;
@@ -136,6 +117,9 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      *
      * @param weatherData The new weather data to be displayed.
      */
+
+    //Este metodo setea el forecast del clima en un forecastAdapter si ya esta creado. Sirve para
+    // cuando recibimos nueva data de la web y no qqueremos crear un nuevo metodo.
     public void setWeatherData(String[] weatherData) {
         mWeatherData = weatherData;
         notifyDataSetChanged();

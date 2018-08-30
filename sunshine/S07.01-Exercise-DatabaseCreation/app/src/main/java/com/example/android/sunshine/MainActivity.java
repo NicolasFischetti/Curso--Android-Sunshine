@@ -73,37 +73,21 @@ public class MainActivity extends AppCompatActivity implements
         /* This TextView is used to display errors and will be hidden if there are no errors */
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
 
-        /*
-         * A LinearLayoutManager is responsible for measuring and positioning item views within a
-         * RecyclerView into a linear list. This means that it can produce either a horizontal or
-         * vertical list depending on which parameter you pass in to the LinearLayoutManager
-         * constructor. In our case, we want a vertical list, so we pass in the constant from the
-         * LinearLayoutManager class for vertical lists, LinearLayoutManager.VERTICAL.
-         *
-         * There are other LayoutManagers available to display your data in uniform grids,
-         * staggered grids, and more! See the developer documentation for more details.
-         */
+        // El linearlayoutmanager es responsable juntar y posicionar los items dentro del Recycler en una lista linear
+        // Puede producir una lista tanto vertical como horizontal dependiendo que parametro que le pases.
+
         int recyclerViewOrientation = LinearLayoutManager.VERTICAL;
 
-        /*
-         *  This value should be true if you want to reverse your layout. Generally, this is only
-         *  true with horizontal lists that need to support a right-to-left layout.
-         */
-        boolean shouldReverseLayout = false;
+        boolean shouldReverseLayout = false; // true si queres hacer tu layout reversible. Generalmente se hace cuando hay una lista horizontal
         LinearLayoutManager layoutManager
                 = new LinearLayoutManager(this, recyclerViewOrientation, shouldReverseLayout);
         mRecyclerView.setLayoutManager(layoutManager);
 
-        /*
-         * Use this setting to improve performance if you know that changes in content do not
-         * change the child layout size in the RecyclerView
-         */
+
+         // si sabes que va a  cambiar el content no tenes que cambiar el tamaño de los hijos del layout
         mRecyclerView.setHasFixedSize(true);
 
-        /*
-         * The ForecastAdapter is responsible for linking our weather data with the Views that
-         * will end up displaying our weather data.
-         */
+        // El forecastAdapter nos sirve para linkear la data con la view que va a terminar mostarando nuestra data
         mForecastAdapter = new ForecastAdapter(this);
 
         /* Setting the adapter attaches it to the RecyclerView in our layout. */
@@ -112,71 +96,61 @@ public class MainActivity extends AppCompatActivity implements
         /*
          * The ProgressBar that will indicate to the user that we are loading data. It will be
          * hidden when no data is loading.
-         *
-         * Please note: This so called "ProgressBar" isn't a bar by default. It is more of a
-         * circle. We didn't make the rules (or the names of Views), we just follow them.
          */
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         /*
-         * This ID will uniquely identify the Loader. We can use it, for example, to get a handle
-         * on our Loader at a later point in time through the support LoaderManager.
-         */
+         * This ID will uniquely identify the Loader. */
         int loaderId = FORECAST_LOADER_ID;
 
-        /*
-         * From MainActivity, we have implemented the LoaderCallbacks interface with the type of
-         * String array. (implements LoaderCallbacks<String[]>) The variable callback is passed
-         * to the call to initLoader below. This means that whenever the loaderManager has
-         * something to notify us of, it will do so through this callback.
-         */
+
+        /* Desde MainActivity, hemos implementado la interfaz LoaderCallbacks con el tipo de
+         * Matriz de cadenas (implementa LoaderCallbacks <String []>) Se pasa la devolución de llamada variable
+                * a la llamada a initLoader a continuación. Esto significa que siempre que el loaderManager tenga
+         * algo para notificarnos, lo hará a través de esta devolución de llamada*/
+
+
         LoaderCallbacks<String[]> callback = MainActivity.this;
 
-        /*
-         * The second parameter of the initLoader method below is a Bundle. Optionally, you can
-         * pass a Bundle to initLoader that you can then access from within the onCreateLoader
-         * callback. In our case, we don't actually use the Bundle, but it's here in case we wanted
-         * to.
-         */
+
+        /* se pude usar el Bundle para el initLoader el cual podes tener acceso desde el onCreateLoader callback. */
         Bundle bundleForLoader = null;
 
+
         /*
-         * Ensures a loader is initialized and active. If the loader doesn't already exist, one is
-         * created and (if the activity/fragment is currently started) starts the loader. Otherwise
-         * the last created loader is re-used.
-         */
+         * Asegura que un loader esté inicializado y activo. Si el loader no existe ya, uno es
+                * creado y (si la actividad / fragmento está actualmente iniciado) inicia el cargador. De otra manera
+                * el último cargador creado se reutiliza.
+                */
         getSupportLoaderManager().initLoader(loaderId, bundleForLoader, callback);
 
         Log.d(TAG, "onCreate: registering preference changed listener");
 
-        /*
-         * Register MainActivity as an OnPreferenceChangedListener to receive a callback when a
-         * SharedPreference has changed. Please note that we must unregister MainActivity as an
-         * OnSharedPreferenceChanged listener in onDestroy to avoid any memory leaks.
-         */
+        /*Registre MainActivity como OnPreferenceChangedListener para recibir una devolución de llamada cuando
+                * SharedPreference ha cambiado. Tenga en cuenta que debemos anular el registro de MainActivity como
+                * OnSharedPreferenceChanged  en onDestroy para evitar fugas de memoria.*/
+
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
     }
-
-    /**
-     * Instantiate and return a new Loader for the given ID.
+    /*
+        * Crear una instancia y devolver un nuevo loader para la identificación dada.
+            *
+            * @param id El ID cuyo loader se va a crear.
+     * @param loaderArgs Cualquier argumento proporcionado por la persona que llama.
      *
-     * @param id The ID whose loader is to be created.
-     * @param loaderArgs Any arguments supplied by the caller.
-     *
-     * @return Return a new Loader instance that is ready to start loading.
+             * @return Devuelve una nueva instancia de Loader que está lista para comenzar a cargarse.
      */
     @Override
     public Loader<String[]> onCreateLoader(int id, final Bundle loaderArgs) {
 
         return new AsyncTaskLoader<String[]>(this) {
 
-            /* This String array will hold and help cache our weather data */
+
+            /*Esta matriz de cadenas mantendrá y ayudará a almacenar en caché nuestros datos meteorológicos */
             String[] mWeatherData = null;
 
-            /**
-             * Subclasses of AsyncTaskLoader must implement this to take care of loading their data.
-             */
+            /*La subclass de AsyncTaskLoader debe iomplementar esto para hacerse cargo de cargar su data*/
             @Override
             protected void onStartLoading() {
                 if (mWeatherData != null) {
@@ -188,11 +162,12 @@ public class MainActivity extends AppCompatActivity implements
             }
 
             /**
-             * This is the method of the AsyncTaskLoader that will load and parse the JSON data
-             * from OpenWeatherMap in the background.
              *
-             * @return Weather data from OpenWeatherMap as an array of Strings.
-             *         null if an error occurs
+             Este es el método del AsyncTaskLoader que cargará y analizará los datos JSON
+             * desde OpenWeatherMap en segundo plano(backgorund)
+             *
+             * @return Devuelve Weather data del OpenWeatherMap como un array de string.
+             *         Si ocurre un error devuelve nulo
              */
             @Override
             public String[] loadInBackground() {
@@ -215,8 +190,8 @@ public class MainActivity extends AppCompatActivity implements
 
             /**
              * Sends the result of the load to the registered listener.
-             *
-             * @param data The result of the load
+             * Envia el resultado de la carga al registered listener
+             * @param data Es ek resultado de la data que cargo
              */
             public void deliverResult(String[] data) {
                 mWeatherData = data;
@@ -227,7 +202,7 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * Called when a previously created loader has finished its load.
-     *
+     * Se lo llama cuando con anterioridad se creo el loader y este termino su carga.
      * @param loader The Loader that has finished.
      * @param data The data generated by the Loader.
      */
@@ -243,9 +218,10 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * Called when a previously created loader is being reset, and thus
-     * making its data unavailable.  The application should at this point
-     * remove any references it has to the Loader's data.
+     *
+     Se llama cuando un loader creado previamente se restablece, y por lo tanto
+     * haciendo que sus datos no estén disponibles. La aplicación debería en este momento
+     * eliminar cualquier referencia que tenga a los datos del loader.
      *
      * @param loader The Loader that is being reset.
      */
@@ -258,8 +234,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * This method is used when we are resetting data, so that at one point in time during a
-     * refresh of our data, you can see that there is no data showing.
+     * Este método se utiliza cuando estamos restableciendo los datos, de modo que en un punto en el tiempo durante un
+     * actualización de nuestros datos, puede ver que no hay datos que se muestran.
      */
     private void invalidateData() {
         mForecastAdapter.setWeatherData(null);
@@ -267,14 +243,8 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * This method uses the URI scheme for showing a location found on a map in conjunction with
-     * an implicit Intent. This super-handy intent is detailed in the "Common Intents" page of
-     * Android's developer site:
-     *
-     * @see "http://developer.android.com/guide/components/intents-common.html#Maps"
-     * <p>
-     * Protip: Hold Command on Mac or Control on Windows and click that link to automagically
-     * open the Common Intents page
-     */
+     * an implicit Intent.
+     * */
     private void openLocationInMap() {
         String addressString = SunshinePreferences.getPreferredWeatherLocation(this);
         Uri geoLocation = Uri.parse("geo:0,0?q=" + addressString);
@@ -290,9 +260,8 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * This method is for responding to clicks from our list.
-     *
-     * @param weatherForDay String describing weather details for a particular day
+     * Este metodo se usa para responder a los clicks de la lista.
+     * @param weatherForDay describe los datos particulares de un dia/lugar
      */
     @Override
     public void onClick(String weatherForDay) {
@@ -306,9 +275,6 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * This method will make the View for the weather data visible and
      * hide the error message.
-     * <p>
-     * Since it is okay to redundantly set the visibility of a View, we don't
-     * need to check whether each view is currently visible or invisible.
      */
     private void showWeatherDataView() {
         /* First, make sure the error is invisible */
@@ -320,9 +286,6 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * This method will make the error message visible and hide the weather
      * View.
-     * <p>
-     * Since it is okay to redundantly set the visibility of a View, we don't
-     * need to check whether each view is currently visible or invisible.
      */
     private void showErrorMessage() {
         /* First, hide the currently visible data */

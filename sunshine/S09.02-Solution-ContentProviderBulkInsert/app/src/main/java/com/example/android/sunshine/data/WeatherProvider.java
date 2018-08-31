@@ -85,7 +85,6 @@ public class WeatherProvider extends ContentProvider {
          * constant fields in your class so that you can use them throughout the class and you no
          * they aren't going to change. In Sunshine, we use CODE_WEATHER or CODE_WEATHER_WITH_DATE.
          */
-
         /* This URI is content://com.example.android.sunshine/weather/ */
         matcher.addURI(authority, WeatherContract.PATH_WEATHER, CODE_WEATHER);
 

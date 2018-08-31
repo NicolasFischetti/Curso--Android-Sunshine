@@ -306,14 +306,8 @@ public class MainActivity extends AppCompatActivity implements
         super.onStart();
 
         /*
-         * If the preferences for location or units have changed since the user was last in
-         * MainActivity, perform another query and set the flag to false.
-         *
-         * This isn't the ideal solution because there really isn't a need to perform another
-         * GET request just to change the units, but this is the simplest solution that gets the
-         * job done for now. Later in this course, we are going to show you more elegant ways to
-         * handle converting the units from celsius to fahrenheit and back without hitting the
-         * network again by keeping a copy of the data in a manageable format.
+         * Cuando las preferencias fueron cambiadas, chequea que esten actualizadas y luego, hace un loader y pasa
+         * las prefencias a false porque ya han sido actualizadas.
          */
         if (PREFERENCES_HAVE_BEEN_UPDATED) {
             Log.d(TAG, "onStart: preferences were updated");
@@ -326,18 +320,19 @@ public class MainActivity extends AppCompatActivity implements
     protected void onDestroy() {
         super.onDestroy();
 
-        /* Unregister MainActivity as an OnPreferenceChangedListener to avoid any memory leaks. */
+        /*  Anule el registro de MainActivity como OnPreferenceChangedListener para evitar fugas de memoria */
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
+        // Usar AppCompatActivity para encargarse de inflar el menu a traves del getMenuInflater
         MenuInflater inflater = getMenuInflater();
-        /* Use the inflater's inflate method to inflate our menu layout to this menu */
+        /*Menu Inflanter : Esta clase se utiliza para crear instancias de archivos XML de menú en objetos de menú(items).
+        /* Utilice el método de inflar del inflador para inflar el diseño de forecast(setting, map location) a este menú */
         inflater.inflate(R.menu.forecast, menu);
-        /* Return true so that the menu is displayed in the Toolbar */
+        /* Retornar true si el menu aparece en la ToolBar */
         return true;
     }
 
@@ -368,14 +363,8 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         /*
-         * Set this flag to true so that when control returns to MainActivity, it can refresh the
-         * data.
+         *  Al setear esto a true esto puede controlar los retornos al MainActivity, y por lo tanto puede actualizar la data
          *
-         * This isn't the ideal solution because there really isn't a need to perform another
-         * GET request just to change the units, but this is the simplest solution that gets the
-         * job done for now. Later in this course, we are going to show you more elegant ways to
-         * handle converting the units from celsius to fahrenheit and back without hitting the
-         * network again by keeping a copy of the data in a manageable format.
          */
         PREFERENCES_HAVE_BEEN_UPDATED = true;
     }

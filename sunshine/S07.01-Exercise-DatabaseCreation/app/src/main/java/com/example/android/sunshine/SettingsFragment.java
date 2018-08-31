@@ -11,14 +11,11 @@ import android.support.v7.preference.PreferenceScreen;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 /**
- * The SettingsFragment serves as the display for all of the user's settings. In Sunshine, the
- * user will be able to change their preference for units of measurement from metric to imperial,
- * set their preferred weather location, and indicate whether or not they'd like to see
- * notifications.
- *
+ * El settingFragment sirve para mostrar todas las settings del usuario.
  * Please note: If you are using our dummy weather services, the location returned will always be
  * Mountain View, California.
  */
+
 public class SettingsFragment extends PreferenceFragmentCompat implements
         SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -26,25 +23,25 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
         String stringValue = value.toString();
 
         if (preference instanceof ListPreference) {
-            // For list preferences, look up the correct display value in
-            // the preference's 'entries' list (since they have separate labels/values).
+            //La lista preference apunta a los labels y values de los entries que se
+            // encuentran mencionados en xml. Se debe ir a string and vaules file.
             ListPreference listPreference = (ListPreference) preference;
             int prefIndex = listPreference.findIndexOfValue(stringValue);
             if (prefIndex >= 0) {
                 preference.setSummary(listPreference.getEntries()[prefIndex]);
             }
         } else {
-            // For other preferences, set the summary to the value's simple string representation.
+            // para otras preferencias , setear el summary al valor representado en un simple string
             preference.setSummary(stringValue);
         }
     }
 
     @Override
     public void onCreatePreferences(Bundle bundle, String s) {
-        // Add 'general' preferences, defined in the XML file
+        // tomar el archivo de pref_general completo
         addPreferencesFromResource(R.xml.pref_general);
 
-        SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
+        SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences(); // setea el valor de xml
         PreferenceScreen prefScreen = getPreferenceScreen();
         int count = prefScreen.getPreferenceCount();
         for (int i = 0; i < count; i++) {
@@ -74,11 +71,11 @@ public class SettingsFragment extends PreferenceFragmentCompat implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        Activity activity = getActivity();
+        Activity activity = getActivity(); // retorna la actividad del fragmento asociado a el
 
         if (key.equals(getString(R.string.pref_location_key))) {
-            // we've changed the location
-            // Wipe out any potential PlacePicker latlng values so that we can use this text entry.
+            // Cambiamos la location
+            // Limpiar cualquier valor potencial de latitud de PlacePicker para que podamos usar esta entrada de texto.
             SunshinePreferences.resetLocationCoordinates(activity);
         }
         Preference preference = findPreference(key);

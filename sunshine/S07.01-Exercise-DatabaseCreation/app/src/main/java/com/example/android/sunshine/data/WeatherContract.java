@@ -32,6 +32,14 @@ public class WeatherContract {
 
 
     /*
+
+    La "autoridad de contenido" es un nombre para todo el proveedor de contenido, similar al
+     * relación entre un nombre de dominio y su sitio web. Una cadena conveniente para usar para
+     * la autoridad de contenido es el nombre del paquete para la aplicación, que se garantiza que es único en el
+     * Tienda de juegos
+Usa CONTENT_AUTHORITY para crear la base de todos los URI que las aplicaciones usarán para contactar
+     * el proveedor de contenido para Sunshine
+
      * Possible paths that can be appended to BASE_CONTENT_URI to form valid URI's that Sunshine
      * can handle. For instance,
      *
@@ -51,7 +59,8 @@ public class WeatherContract {
     //  TODO (1) Within WeatherContract, create a public static final class called WeatherEntry that implements BaseColumns
     public static final class WeatherEntry implements BaseColumns {
 
-        /* The base CONTENT_URI used to query the Weather table from the content provider */
+        /*
+        * /* La base CONTENT_URI utilizada para consultar la tabla Meteorología del proveedor de contenido */
         public static final Uri CONTENT_URI = BASE_CONTENT_URI.buildUpon()
                 .appendPath(PATH_WEATHER)
                 .build();
@@ -66,11 +75,28 @@ public class WeatherContract {
         public static final String COLUMN_WIND_SPEEDLE = "wind";
         public static final String COLUMN_DEGREES = "degrees";
 
+        /*
+                * Crea un URI que agrega la fecha del tiempo hasta el final de la ruta del URI del contenido del pronóstico.
+         * Esto se usa para consultar detalles sobre una entrada de clima individual por fecha. Esto es lo que
+         * uso para la consulta de vista detallada. Suponemos que se pasa una fecha normalizada a este método.
+                *
+                * @param date Fecha normalizada en milisegundos
+         * @return Uri para consultar detalles sobre una sola entrada en el clima
+         */
+
         public static Uri buildWeatherUriWithDate(long date) {
             return CONTENT_URI.buildUpon()
                     .appendPath(Long.toString(date))
                     .build();
         }
+
+        /*
+                * Devuelve solo la parte de selección de la consulta meteorológica de un valor normalizado de hoy.
+                * Esto se usa para obtener un pronóstico del tiempo a partir de la fecha de hoy. Para hacer esto fácil de usar
+         * en la selección de compuestos, incorporamos la fecha de hoy como un argumento en la consulta.
+         *
+                 * @return La parte de selección de la consulta meteorológica para hoy en adelante
+         */
 
         public static String getSqlSelectForTodayOnwards() {
             long normalizedUtcNow = SunshineDateUtils.normalizeDate(System.currentTimeMillis());

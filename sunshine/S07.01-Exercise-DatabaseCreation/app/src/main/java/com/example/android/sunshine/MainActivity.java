@@ -20,8 +20,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.preference.PreferenceManager;
@@ -34,8 +36,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.database.Cursor;
 
 import com.example.android.sunshine.data.SunshinePreferences;
+import com.example.android.sunshine.data.WeatherContract;
 import com.example.android.sunshine.utilities.NetworkUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 
@@ -43,21 +47,36 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements
         ForecastAdapter.ForecastAdapterOnClickHandler,
-        LoaderCallbacks<String[]>,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        LoaderManager.LoaderCallbacks<Cursor> {
 
+    //      TODO (20) Implement LoaderCallbacks<Cursor> instead of String[]
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private RecyclerView mRecyclerView;
     private ForecastAdapter mForecastAdapter;
 
-    private TextView mErrorMessageDisplay;
 
     private ProgressBar mLoadingIndicator;
 
     private static final int FORECAST_LOADER_ID = 0;
 
-    private static boolean PREFERENCES_HAVE_BEEN_UPDATED = false;
+    private int mPosition = RecyclerView.NO_POSITION;
+
+    //  TODO (16) Create a String array containing the names of the desired data columns from our ContentProvider
+//  TODO (17) Create constant int values representing each column name's position above
+
+    private static final String[] MAIN_FORECAST_PROJECTION = {
+            WeatherContract.WeatherEntry.COLUMN_DATE,
+            WeatherContract.WeatherEntry.COLUMN_WEATHER,
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+            WeatherContract.WeatherEntry.COLUMN_MAX_TEMP,
+    };
+
+    public static final int INDEX_WEATHER_DATE = 0;
+    public static final int INDEX_WEATHER_MAX_TEMP = 1;
+    public static final int INDEX_WEATHER_MIN_TEMP = 2;
+    public static final int INDEX_WEATHER_CONDITION_ID = 3;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview_forecast);
 
         /* This TextView is used to display errors and will be hidden if there are no errors */
-        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+        /*mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);*/
 
         // El linearlayoutmanager es responsable juntar y posicionar los items dentro del Recycler en una lista linear
         // Puede producir una lista tanto vertical como horizontal dependiendo que parametro que le pases.
@@ -88,10 +107,11 @@ public class MainActivity extends AppCompatActivity implements
         mRecyclerView.setHasFixedSize(true);
 
         // El forecastAdapter nos sirve para linkear la data con la view que va a terminar mostarando nuestra data
-        mForecastAdapter = new ForecastAdapter(this);
+        mForecastAdapter = new ForecastAdapter(this, this);
 
         /* Setting the adapter attaches it to the RecyclerView in our layout. */
         mRecyclerView.setAdapter(mForecastAdapter);
+
 
         /*
          * The ProgressBar that will indicate to the user that we are loading data. It will be
@@ -103,6 +123,8 @@ public class MainActivity extends AppCompatActivity implements
          * This ID will uniquely identify the Loader. */
         int loaderId = FORECAST_LOADER_ID;
 
+        showWeatherDataView();
+
 
         /* Desde MainActivity, hemos implementado la interfaz LoaderCallbacks con el tipo de
          * Matriz de cadenas (implementa LoaderCallbacks <String []>) Se pasa la devolución de llamada variable
@@ -110,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements
          * algo para notificarnos, lo hará a través de esta devolución de llamada*/
 
 
-        LoaderCallbacks<String[]> callback = MainActivity.this;
+        LoaderCallbacks<Cursor> callback = MainActivity.this;
 
 
         /* se pude usar el Bundle para el initLoader el cual podes tener acceso desde el onCreateLoader callback. */
@@ -130,8 +152,6 @@ public class MainActivity extends AppCompatActivity implements
                 * SharedPreference ha cambiado. Tenga en cuenta que debemos anular el registro de MainActivity como
                 * OnSharedPreferenceChanged  en onDestroy para evitar fugas de memoria.*/
 
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .registerOnSharedPreferenceChangeListener(this);
     }
     /*
         * Crear una instancia y devolver un nuevo loader para la identificación dada.
@@ -142,15 +162,32 @@ public class MainActivity extends AppCompatActivity implements
              * @return Devuelve una nueva instancia de Loader que está lista para comenzar a cargarse.
      */
     @Override
-    public Loader<String[]> onCreateLoader(int id, final Bundle loaderArgs) {
+    public Loader<Cursor> onCreateLoader(int id,  Bundle bundle) {
 
-        return new AsyncTaskLoader<String[]>(this) {
+       // TODO (22) If the loader requested is our forecast loader, return the appropriate CursorLoader
+        int loader = FORECAST_LOADER_ID;
 
+        switch (loader) {
+            case FORECAST_LOADER_ID:
 
-            /*Esta matriz de cadenas mantendrá y ayudará a almacenar en caché nuestros datos meteorológicos */
+                /* URI for all rows of weather data in our weather table */
+                Uri forecastQueryUri = WeatherContract.WeatherEntry.CONTENT_URI;
+                /* Sort order: Ascending by date */
+                String sortOrder = WeatherContract.WeatherEntry.COLUMN_DATE + " ASC";
+
+                String section = WeatherContract.WeatherEntry.getSqlSelectForTodayOnwards();
+
+                return new CursorLoader(this, forecastQueryUri,MAIN_FORECAST_PROJECTION,
+                        section, null, sortOrder);
+            default:
+                throw new RuntimeException("Loader Not Implemented: " + loader);
+            }
+        }
+
+         /*   /*Esta matriz de cadenas mantendrá y ayudará a almacenar en caché nuestros datos meteorológicos
             String[] mWeatherData = null;
 
-            /*La subclass de AsyncTaskLoader debe iomplementar esto para hacerse cargo de cargar su data*/
+            /*La subclass de AsyncTaskLoader debe iomplementar esto para hacerse cargo de cargar su data
             @Override
             protected void onStartLoading() {
                 if (mWeatherData != null) {
@@ -168,8 +205,8 @@ public class MainActivity extends AppCompatActivity implements
              *
              * @return Devuelve Weather data del OpenWeatherMap como un array de string.
              *         Si ocurre un error devuelve nulo
-             */
-            @Override
+
+
             public String[] loadInBackground() {
 
                 URL weatherRequestUrl = NetworkUtils.getUrl(MainActivity.this);
@@ -192,13 +229,13 @@ public class MainActivity extends AppCompatActivity implements
              * Sends the result of the load to the registered listener.
              * Envia el resultado de la carga al registered listener
              * @param data Es ek resultado de la data que cargo
-             */
+
             public void deliverResult(String[] data) {
                 mWeatherData = data;
                 super.deliverResult(data);
-            }
-        };
-    }
+            } */
+
+
 
     /**
      * Called when a previously created loader has finished its load.
@@ -206,16 +243,38 @@ public class MainActivity extends AppCompatActivity implements
      * @param loader The Loader that has finished.
      * @param data The data generated by the Loader.
      */
+
     @Override
-    public void onLoadFinished(Loader<String[]> loader, String[] data) {
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        mForecastAdapter.setWeatherData(data);
-        if (null == data) {
-            showErrorMessage();
-        } else {
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+        mForecastAdapter.SwapCursors(data);
+
+        if(mPosition == RecyclerView.NO_POSITION) {
+            mPosition = 0;
+        }
+
+        mRecyclerView.smoothScrollToPosition(mPosition);
+
+        if(data.getCount() != 0) {
             showWeatherDataView();
         }
+
+
+        //      TODO (28) Call mForecastAdapter's swapCursor method and pass in the new Cursor
+//      TODO (29) If mPosition equals RecyclerView.NO_POSITION, set it to 0
+//      TODO (30) Smooth scroll the RecyclerView to mPosition
+//      TODO (31) If the Cursor's size is not equal to 0, call showWeatherDataView
+//      TODO (32) Call mForecastAdapter's swapCursor method and pass in null
+//  TODO (33) Delete showErrorMessage
+//  TODO (34) Create a method called showLoading that shows the loading indicator and hides the data
+
     }
+
+    private void showLoading() {
+        mRecyclerView.setVisibility(View.INVISIBLE);
+        mLoadingIndicator.setVisibility(View.VISIBLE);
+    }
+
 
     /**
      *
@@ -226,11 +285,12 @@ public class MainActivity extends AppCompatActivity implements
      * @param loader The Loader that is being reset.
      */
     @Override
-    public void onLoaderReset(Loader<String[]> loader) {
+    public void onLoaderReset(Loader<Cursor> loader) {
         /*
          * We aren't using this method in our example application, but we are required to Override
          * it to implement the LoaderCallbacks<String> interface
          */
+        mForecastAdapter.SwapCursors(null);
     }
 
     /**
@@ -238,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements
      * actualización de nuestros datos, puede ver que no hay datos que se muestran.
      */
     private void invalidateData() {
-        mForecastAdapter.setWeatherData(null);
+
     }
 
     /**
@@ -278,7 +338,7 @@ public class MainActivity extends AppCompatActivity implements
      */
     private void showWeatherDataView() {
         /* First, make sure the error is invisible */
-        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        /*mErrorMessageDisplay.setVisibility(View.INVISIBLE);
         /* Then, make sure the weather data is visible */
         mRecyclerView.setVisibility(View.VISIBLE);
     }
@@ -287,12 +347,12 @@ public class MainActivity extends AppCompatActivity implements
      * This method will make the error message visible and hide the weather
      * View.
      */
-    private void showErrorMessage() {
-        /* First, hide the currently visible data */
+   /* private void showErrorMessage() {
+        /* First, hide the currently visible data
         mRecyclerView.setVisibility(View.INVISIBLE);
-        /* Then, show the error */
+        /* Then, show the error
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
-    }
+    } */
 
     /**
      * OnStart is called when the Activity is coming into view. This happens when the Activity is
@@ -309,11 +369,11 @@ public class MainActivity extends AppCompatActivity implements
          * Cuando las preferencias fueron cambiadas, chequea que esten actualizadas y luego, hace un loader y pasa
          * las prefencias a false porque ya han sido actualizadas.
          */
-        if (PREFERENCES_HAVE_BEEN_UPDATED) {
+        /*if (PREFERENCES_HAVE_BEEN_UPDATED) {
             Log.d(TAG, "onStart: preferences were updated");
             getSupportLoaderManager().restartLoader(FORECAST_LOADER_ID, null, this);
             PREFERENCES_HAVE_BEEN_UPDATED = false;
-        }
+        }*/
     }
 
     @Override
@@ -321,8 +381,7 @@ public class MainActivity extends AppCompatActivity implements
         super.onDestroy();
 
         /*  Anule el registro de MainActivity como OnPreferenceChangedListener para evitar fugas de memoria */
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener(this);
+
     }
 
     @Override
@@ -360,12 +419,35 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
+    /*@Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         /*
          *  Al setear esto a true esto puede controlar los retornos al MainActivity, y por lo tanto puede actualizar la data
          *
-         */
+
         PREFERENCES_HAVE_BEEN_UPDATED = true;
-    }
+    }*/
 }
+
+    //      1TODO (15) Remove the implements declaration for SharedPreferences change listener and methods
+//  2TODO (16) Create a String array containing the names of the desired data columns from our ContentProvider
+//  3TODO (17) Create constant int values representing each column name's position above
+//      4TODO (18) Call the showLoading method
+//    5TODO (19) Remove the statement that registers Mainactivity as a preference change listener
+
+    //      1TODO (20) Implement LoaderCallbacks<Cursor> instead of String[]
+//  2TODO (21) Refactor onCreateLoader to return a Loader<Cursor>, not Loader<String[]>
+//          4TODO (22) If the loader requested is our forecast loader, return the appropriate CursorLoader
+ //   3TODO (23) Remove the onStartLoading method declaration
+//      4TODO (24) Remove the loadInBackground method declaration
+//      5TODO (25) Remove the deliverResult method declaration
+//  6TODO (26) Change onLoadFinished parameter to a Loader<Cursor> instead of a Loader<String[]>
+//      7TODO (27) Remove the previous body of onLoadFinished
+
+//      TODO (28) Call mForecastAdapter's swapCursor method and pass in the new Cursor
+//      TODO (29) If mPosition equals RecyclerView.NO_POSITION, set it to 0
+//      TODO (30) Smooth scroll the RecyclerView to mPosition
+//      TODO (31) If the Cursor's size is not equal to 0, call showWeatherDataView
+//      TODO (32) Call mForecastAdapter's swapCursor method and pass in null
+//  TODO (33) Delete showErrorMessage
+//  TODO (34) Create a method called showLoading that shows the loading indicator and hides the data

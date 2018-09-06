@@ -50,7 +50,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      * The interface that receives onClick messages.
      */
     public interface ForecastAdapterOnClickHandler { // un click para cada dia
-        void onClick(String weatherForDay);
+        void onClick(long date);
     }
 
     /**
@@ -68,12 +68,14 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      * Cache of the children views for a forecast list item.
      */
     public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
-        public final TextView mWeatherTextView; // trae el id del texto
+        final TextView weatherSummary;
 
-        public ForecastAdapterViewHolder(View view) {
-            super(view); // crea el constructor de la view
-            mWeatherTextView = (TextView) view.findViewById(R.id.tv_weather_data);
-            view.setOnClickListener(this); // le setea o implementa un onclick
+        ForecastAdapterViewHolder(View view) {
+            super(view);
+
+            weatherSummary = (TextView) view.findViewById(R.id.tv_weather_data);
+
+            view.setOnClickListener(this);
         }
 
         /**
@@ -83,8 +85,10 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
          */
         @Override
         public void onClick(View v) { // v es la View que fue clikeada. Esto se llama por las vistas secundarios haciendo un click.
-            String weatherForDay = mWeatherTextView.getText().toString();
-            mClickHandler.onClick(weatherForDay);
+            int adapterPosition = getAdapterPosition();
+            mCursor.moveToPosition(adapterPosition);
+            long dateMillis = mCursor.getLong(MainActivity.INDEX_WEATHER_DATE);
+            mClickHandler.onClick(dateMillis);
         }
     }
 
@@ -119,19 +123,17 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         int id = mCursor.getInt(MainActivity.INDEX_WEATHER_CONDITION_ID);
         String description = SunshineWeatherUtils.getStringForWeatherCondition(mContext, id);
 
-        String mWeatherTextView = dateString + " - " + description + " - " + HighLow;
+        String weatherSummary = dateString + " - " + description + " - " + HighLow;
 
-        forecastAdapterViewHolder.mWeatherTextView.setText(mWeatherTextView);
+        forecastAdapterViewHolder.weatherSummary.setText(weatherSummary);
     }
 
     // Retorna el numero de items que se muestra
     @Override
     public int getItemCount() {
-        if(mCursor == null)
-            return 0;
-        else {
+            if (null == mCursor) return 0;
             return mCursor.getCount();
-        }
+
        /* if (null == mWeatherData) return 0;
         return mWeatherData.length; */
     }
@@ -155,6 +157,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         mWeatherData = weatherData;
         notifyDataSetChanged();
     }*/
+
 }
 
 

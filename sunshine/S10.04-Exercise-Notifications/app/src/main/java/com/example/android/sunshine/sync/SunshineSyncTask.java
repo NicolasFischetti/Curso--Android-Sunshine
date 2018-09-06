@@ -15,15 +15,22 @@
  */
 package com.example.android.sunshine.sync;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 
+import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
 import com.example.android.sunshine.utilities.NetworkUtils;
+import com.example.android.sunshine.utilities.NotificationUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
+import java.util.prefs.Preferences;
 
 public class SunshineSyncTask {
 
@@ -35,6 +42,10 @@ public class SunshineSyncTask {
      *
      * @param context Used to access utility methods and the ContentResolver
      */
+
+    private static final int NOTIFICATION_HOURS = 24;
+    private static final int PARSE_NOTIFICATION_HOURS = (int) TimeUnit.HOURS.toHours(NOTIFICATION_HOURS);
+
     synchronized public static void syncWeather(Context context) {
 
         try {
@@ -73,6 +84,20 @@ public class SunshineSyncTask {
                         WeatherContract.WeatherEntry.CONTENT_URI,
                         weatherValues);
 
+                boolean notificationsEnabled = SunshinePreferences.areNotificationsEnabled(context);
+
+                long  checkLastNotiTime = SunshinePreferences.getEllapsedTimeSinceLastNotification(context);
+
+                boolean oneDayPassedSinceNotification = false;
+
+                if(checkLastNotiTime > PARSE_NOTIFICATION_HOURS) {
+                    oneDayPassedSinceNotification = true;
+
+                }
+
+                if (notificationsEnabled && oneDayPassedSinceNotification) {
+                        NotificationUtils.notifyUserOfNewWeather(context);
+                }
 //              TODO (13) Check if notifications are enabled
 
 //              TODO (14) Check if a day has passed since the last notification

@@ -17,14 +17,44 @@ package com.example.android.sunshine.sync;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+
+import com.example.android.sunshine.data.WeatherContract;
 
 
 public class SunshineSyncUtils {
 
-//  TODO (1) Declare a private static boolean field called sInitialized
+        private static boolean sInitialized;
 
-    //  TODO (2) Create a synchronized public static void method called initialize
+        synchronized public static void initialize (final Context context) {
+
+            if(sInitialized)
+                    return;
+            sInitialized= true;
+
+            Uri weatherProvider = WeatherContract.WeatherEntry.CONTENT_URI;
+
+            String[] projectionColumns = {WeatherContract.WeatherEntry._ID};
+            String selectionStatement = WeatherContract.WeatherEntry.getSqlSelectForTodayOnwards();
+
+            /* Here, we perform the query to check to see if we have any weather data */
+            Cursor cursor = context.getContentResolver().query(
+                    weatherProvider,
+                    projectionColumns,
+                    selectionStatement,
+                    null,
+                    null);
+
+            if(weatherProvider.equals(Uri.EMPTY) || cursor == null || cursor.getCount() == 0) {
+                startImmediateSync(context);
+            }
+
+        }
+
+//  TODO (1) Declare a private static boolean field called sInitialized
+//  TODO (2) Create a synchronized public static void method called initialize
     //  TODO (3) Only execute this method body if sInitialized is false
     //  TODO (4) If the method body is executed, set sInitialized to true
     //  TODO (5) Check to see if our weather ContentProvider is empty

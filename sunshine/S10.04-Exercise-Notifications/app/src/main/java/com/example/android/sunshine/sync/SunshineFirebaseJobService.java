@@ -52,6 +52,7 @@ public class SunshineFirebaseJobService extends JobService {
 
             @Override
             protected void onPostExecute(Void aVoid) {
+
                 jobFinished(jobParameters, false);
             }
         };

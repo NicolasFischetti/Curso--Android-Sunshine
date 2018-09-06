@@ -33,7 +33,6 @@ public class SunshineSyncTask {
      * inserts the new weather information into our ContentProvider. Will notify the user that new
      * weather has been loaded if the user hasn't been notified of the weather within the last day
      * AND they haven't disabled notifications in the preferences screen.
-     *
      * @param context Used to access utility methods and the ContentResolver
      */
     synchronized public static void syncWeather(Context context) {

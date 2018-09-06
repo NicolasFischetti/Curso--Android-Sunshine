@@ -34,12 +34,14 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.database.Cursor;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.WeatherContract;
+import com.example.android.sunshine.utilities.FakeDataUtils;
 import com.example.android.sunshine.utilities.NetworkUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 
@@ -58,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements
 
     private ProgressBar mLoadingIndicator;
 
-    private static final int FORECAST_LOADER_ID = 0;
+    private static final int FORECAST_LOADER_ID = 44;
 
     private int mPosition = RecyclerView.NO_POSITION;
 
@@ -82,7 +84,9 @@ public class MainActivity extends AppCompatActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
+        getSupportActionBar().setElevation(0f);
 
+        FakeDataUtils.insertFakeData(this);
         /*
          * Using findViewById, we get a reference to our RecyclerView from xml. This allows us to
          * do things like set the adapter of the RecyclerView and toggle the visibility.
@@ -99,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements
 
         boolean shouldReverseLayout = false; // true si queres hacer tu layout reversible. Generalmente se hace cuando hay una lista horizontal
         LinearLayoutManager layoutManager
-                = new LinearLayoutManager(this, recyclerViewOrientation, shouldReverseLayout);
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(layoutManager);
 
 
@@ -123,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements
          * This ID will uniquely identify the Loader. */
         int loaderId = FORECAST_LOADER_ID;
 
-        showWeatherDataView();
+
 
 
         /* Desde MainActivity, hemos implementado la interfaz LoaderCallbacks con el tipo de
@@ -144,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements
                 * creado y (si la actividad / fragmento está actualmente iniciado) inicia el cargador. De otra manera
                 * el último cargador creado se reutiliza.
                 */
-        getSupportLoaderManager().initLoader(loaderId, bundleForLoader, callback);
+        getSupportLoaderManager().initLoader(FORECAST_LOADER_ID, null, this);
 
         Log.d(TAG, "onCreate: registering preference changed listener");
 
@@ -152,6 +156,7 @@ public class MainActivity extends AppCompatActivity implements
                 * SharedPreference ha cambiado. Tenga en cuenta que debemos anular el registro de MainActivity como
                 * OnSharedPreferenceChanged  en onDestroy para evitar fugas de memoria.*/
 
+        showLoading();
     }
     /*
         * Crear una instancia y devolver un nuevo loader para la identificación dada.
@@ -162,12 +167,12 @@ public class MainActivity extends AppCompatActivity implements
              * @return Devuelve una nueva instancia de Loader que está lista para comenzar a cargarse.
      */
     @Override
-    public Loader<Cursor> onCreateLoader(int id,  Bundle bundle) {
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundle) {
 
        // TODO (22) If the loader requested is our forecast loader, return the appropriate CursorLoader
-        int loader = FORECAST_LOADER_ID;
+        int loaderid = FORECAST_LOADER_ID;
 
-        switch (loader) {
+        switch (loaderid) {
             case FORECAST_LOADER_ID:
 
                 /* URI for all rows of weather data in our weather table */
@@ -180,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements
                 return new CursorLoader(this, forecastQueryUri,MAIN_FORECAST_PROJECTION,
                         section, null, sortOrder);
             default:
-                throw new RuntimeException("Loader Not Implemented: " + loader);
+                throw new RuntimeException("Loader Not Implemented: " + loaderid);
             }
         }
 
@@ -248,16 +253,11 @@ public class MainActivity extends AppCompatActivity implements
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
         mForecastAdapter.SwapCursors(data);
-
-        if(mPosition == RecyclerView.NO_POSITION) {
+        if (mPosition == RecyclerView.NO_POSITION)
             mPosition = 0;
-        }
-
         mRecyclerView.smoothScrollToPosition(mPosition);
-
-        if(data.getCount() != 0) {
+        if (data.getCount() != 0)
             showWeatherDataView();
-        }
 
 
         //      TODO (28) Call mForecastAdapter's swapCursor method and pass in the new Cursor
@@ -323,23 +323,22 @@ public class MainActivity extends AppCompatActivity implements
      * Este metodo se usa para responder a los clicks de la lista.
      * @param weatherForDay describe los datos particulares de un dia/lugar
      */
-    @Override
+/*
     public void onClick(String weatherForDay) {
         Context context = this;
         Class destinationClass = DetailActivity.class;
         Intent intentToStartDetailActivity = new Intent(context, destinationClass);
         intentToStartDetailActivity.putExtra(Intent.EXTRA_TEXT, weatherForDay);
-        startActivity(intentToStartDetailActivity);
-    }
+        startActivity(intentToStartDetailActivity)};*/
+
 
     /**
      * This method will make the View for the weather data visible and
      * hide the error message.
      */
     private void showWeatherDataView() {
-        /* First, make sure the error is invisible */
-        /*mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-        /* Then, make sure the weather data is visible */
+
+         mLoadingIndicator.setVisibility(View.INVISIBLE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
@@ -361,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements
      * check if the location setting or the preferred units setting has changed. If it has changed,
      * we are going to perform a new query.
      */
-    @Override
+   /* @Override
     protected void onStart() {
         super.onStart();
 
@@ -373,16 +372,16 @@ public class MainActivity extends AppCompatActivity implements
             Log.d(TAG, "onStart: preferences were updated");
             getSupportLoaderManager().restartLoader(FORECAST_LOADER_ID, null, this);
             PREFERENCES_HAVE_BEEN_UPDATED = false;
-        }*/
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        /*  Anule el registro de MainActivity como OnPreferenceChangedListener para evitar fugas de memoria */
+        /*  Anule el registro de MainActivity como OnPreferenceChangedListener para evitar fugas de memoria
 
-    }
+    } */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -418,6 +417,16 @@ public class MainActivity extends AppCompatActivity implements
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onClick(long date) {
+        Intent weatherDetailIntent = new Intent(MainActivity.this, DetailActivity.class);
+        Uri uriForDateClicked = WeatherContract.WeatherEntry.buildWeatherUriWithDate(date);
+        weatherDetailIntent.setData(uriForDateClicked);
+        startActivity(weatherDetailIntent);
+    }
+
+
 
     /*@Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {

@@ -30,7 +30,9 @@
         android:paddingLeft="32dp"
         android:paddingRight="32dp"
         android:paddingStart="32dp"
-        android:paddingTop="16dp">
+        android:paddingTop="16dp"
+        android:background="#e0f7fa"
+        >
 
         <!-- This guideline divides the layout into a left and right half and is used for alignment -->
         <android.support.constraint.Guideline
@@ -46,6 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/humidity_label"
+            android:fontFamily="sans-serif"
             app:layout_constraintBottom_toTopOf="@+id/pressure_label"
             app:layout_constraintLeft_toLeftOf="@+id/extra_details"
             app:layout_constraintTop_toTopOf="@+id/extra_details"

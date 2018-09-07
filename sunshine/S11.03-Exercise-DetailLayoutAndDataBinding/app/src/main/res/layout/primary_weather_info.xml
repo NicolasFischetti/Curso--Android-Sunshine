@@ -1,34 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-     Copyright (C) 2016 The Android Open Source Project
-
-     Licensed under the Apache License, Version 2.0 (the "License");
-     you may not use this file except in compliance with the License.
-     You may obtain a copy of the License at
-
-          http://www.apache.org/licenses/LICENSE-2.0
-
-     Unless required by applicable law or agreed to in writing, software
-     distributed under the License is distributed on an "AS IS" BASIS,
-     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-     See the License for the specific language governing permissions and
-     limitations under the License.
--->
-
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  - This layout displays a given day's primary weather information, such as the date of the      -
-  - weather, an icon and description, and the high and low temperature.                          -
-  -                                                                                              -
-  - In order to use Android's data binding capabilities, (to avoid having to type findViewById   -
-  - over and over again) we wrap this layout in a <layout></layout> tag.                         -
-  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!-- TODO (14) Color the description, high temperature, and low temperature appropriately -->
-<!-- TODO (15) Replace dimension values with @dimen resources -->
-<!-- TODO (16) Use sans-serif-light font family for the temperature TextViews -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- COMPLETED (27) Using ConstraintLayout, create the primary weather info layout -->
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -85,7 +60,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:textSize="20sp"
-            android:fontFamily="sans-serif"
             app:layout_constraintHorizontal_bias="0.52"
             app:layout_constraintLeft_toLeftOf="@+id/weather_icon"
             app:layout_constraintRight_toRightOf="@+id/weather_icon"
@@ -106,8 +80,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="72sp"
-            android:fontFamily="sans-serif"
-            android:textColor="#ef5350"
             app:layout_constraintBottom_toBottomOf="@+id/weather_icon"
             app:layout_constraintHorizontal_bias="0.45"
             app:layout_constraintLeft_toLeftOf="@+id/horizontal_middle"
@@ -129,7 +101,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="36sp"
-            android:textColor="#00e676"
             app:layout_constraintBaseline_toBaselineOf="@+id/weather_description"
             app:layout_constraintLeft_toLeftOf="@+id/high_temperature"
             app:layout_constraintRight_toRightOf="@+id/high_temperature"

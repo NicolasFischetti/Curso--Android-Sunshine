@@ -18,6 +18,11 @@
                   android:layout_width="match_parent"
                   android:layout_height="match_parent">
 
+    <PreferenceCategory
+        android:title="Weather Setting"
+        android:textStyle="bold"
+        android:key="pref_key_storage_settings">
+
     <EditTextPreference
         android:defaultValue="@string/pref_location_default"
         android:inputType="text"
@@ -25,12 +30,20 @@
         android:singleLine="true"
         android:title="@string/pref_location_label" />
 
-    <ListPreference
-        android:defaultValue="@string/pref_units_metric"
-        android:entries="@array/pref_units_options"
-        android:entryValues="@array/pref_units_values"
-        android:key="@string/pref_units_key"
-        android:title="@string/pref_units_label" />
+
+        <ListPreference
+                android:defaultValue="@string/pref_units_metric"
+                android:entries="@array/pref_units_options"
+                android:entryValues="@array/pref_units_values"
+                android:key="@string/pref_units_key"
+                android:title="@string/pref_units_label" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+
+        android:title="Notification settings"
+        android:textStyle="bold"
+        android:key="notification_setting_key">
 
     <CheckBoxPreference
         android:defaultValue="@bool/show_notifications_by_default"
@@ -38,5 +51,7 @@
         android:summaryOff="@string/pref_enable_notifications_false"
         android:summaryOn="@string/pref_enable_notifications_true"
         android:title="@string/pref_enable_notifications_label" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>
